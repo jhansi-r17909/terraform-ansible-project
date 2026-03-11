@@ -1,0 +1,6 @@
+- name: Configure Minikube Cluster
+  hosts: minikube
+  become: yes
+
+  roles:
+    - minikube
