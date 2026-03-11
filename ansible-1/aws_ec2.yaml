@@ -1,0 +1,13 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - eu-north-1
+filters:
+  tag:Project: minikube-host
+  instance-state-name: running
+groups:
+  minikube: true
+hostnames:
+  - public_ip_address
+compose:
+  ansible_user: "'ec2-user'"
+  ansible_python_interpreter: "'/usr/bin/python3'"
