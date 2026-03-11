@@ -2,34 +2,42 @@
 - name: Configure EC2 host for Minikube and Helm
   hosts: minikube
   become: true
+
   vars:
     kubectl_version: "v1.30.1"
     minikube_version: "v1.35.0"
     helm_version: "v3.15.4"
-    target_user: "ec2-user"
-    target_home: "/home/ec2-user"
+    target_user: "ubuntu"
+    target_home: "/home/ubuntu"
     minikube_memory_mb: 2200
     minikube_cpus: 2
 
   pre_tasks:
-    - name: Wait for SSH to become available
+    - name: Wait for SSH
       ansible.builtin.wait_for_connection:
         timeout: 300
 
   tasks:
-    - name: Install OS packages required for Docker and Minikube
-      ansible.builtin.dnf:
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install required packages
+      ansible.builtin.apt:
         name:
-          - docker
+          - docker.io
           - conntrack
           - curl
           - git
-          - iproute
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
           - iptables
           - socat
           - tar
         state: present
-        allowerasing: true
 
     - name: Enable and start Docker
       ansible.builtin.systemd:
@@ -37,53 +45,52 @@
         enabled: true
         state: started
 
-    - name: Add ec2-user to docker group
+    - name: Add user to docker group
       ansible.builtin.user:
         name: "{{ target_user }}"
         groups: docker
-        append: true
+        append: yes
 
     - name: Download kubectl
       ansible.builtin.get_url:
         url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
         dest: /usr/local/bin/kubectl
-        mode: "0755"
+        mode: '0755'
 
     - name: Download Minikube
       ansible.builtin.get_url:
         url: "https://storage.googleapis.com/minikube/releases/{{ minikube_version }}/minikube-linux-amd64"
         dest: /usr/local/bin/minikube
-        mode: "0755"
+        mode: '0755'
 
     - name: Download Helm archive
       ansible.builtin.get_url:
         url: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
         dest: /tmp/helm.tar.gz
-        mode: "0644"
 
-    - name: Extract Helm archive
+    - name: Extract Helm
       ansible.builtin.unarchive:
         src: /tmp/helm.tar.gz
         dest: /tmp
         remote_src: true
-        creates: /tmp/linux-amd64/helm
 
-    - name: Install Helm binary
+    - name: Install Helm
       ansible.builtin.copy:
         src: /tmp/linux-amd64/helm
         dest: /usr/local/bin/helm
         remote_src: true
-        mode: "0755"
+        mode: '0755'
 
-    - name: Start Minikube with the Docker driver
+    - name: Start Minikube
       become_user: "{{ target_user }}"
       ansible.builtin.shell: |
-        sg docker -c 'minikube status >/dev/null 2>&1 || minikube start --driver=docker --memory={{ minikube_memory_mb }} --cpus={{ minikube_cpus }}'
+        minikube status >/dev/null 2>&1 || \
+        minikube start --driver=docker --memory={{ minikube_memory_mb }} --cpus={{ minikube_cpus }}
       args:
         executable: /bin/bash
         chdir: "{{ target_home }}"
 
-    - name: Verify kubectl can reach the cluster
+    - name: Verify cluster
       become_user: "{{ target_user }}"
       ansible.builtin.command: kubectl get nodes
       environment:
