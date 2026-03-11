@@ -1,0 +1,36 @@
+---
+
+- name: Update apt packages
+  apt:
+    update_cache: yes
+
+- name: Install dependencies
+  apt:
+    name:
+      - docker.io
+      - curl
+      - wget
+    state: present
+
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Download kubectl
+  get_url:
+    url: https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+
+- name: Download Minikube
+  get_url:
+    url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    dest: /usr/local/bin/minikube
+    mode: '0755'
+
+- name: Start Minikube
+  become_user: ubuntu
+  shell: |
+    minikube start --driver=docker
