@@ -116,6 +116,11 @@ pipeline {
                 sshagent(credentials: ['ec2-key']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} << 'EOF'
+                    
+                    echo "Cloning repository on EC2..."
+                    if [ ! -d terraform-ansible-project ]; then
+                    git clone https://github.com/darninidhi2122/terraform-ansible-project.git
+                    fi
 
                     cd terraform-ansible-project
 
