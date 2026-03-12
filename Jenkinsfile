@@ -124,17 +124,19 @@ pipeline {
 
                     cd terraform-ansible-project
 
+                    export KUBECONFIG=/home/ubuntu/.kube/config
+
                     echo "Checking Kubernetes nodes..."
                     kubectl get nodes
 
                     echo "Deploying Helm chart..."
-                    helm upgrade --install nginx-app helm/nginx-chart
+                    helm upgrade --install nginx-app ./helm/nginx-chart
 
                     echo "Checking pods..."
-                    kubectl get pods
+                    kubectl get pods -A
 
                     echo "Checking services..."
-                    kubectl get svc
+                    kubectl get svc -A
 
                     EOF
                     """
