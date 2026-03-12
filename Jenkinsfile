@@ -18,8 +18,13 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir('infra') {
-                    sh 'terraform init'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    dir('infra') {
+                        sh 'terraform init'
+                    }
                 }
             }
         }
@@ -34,16 +39,26 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                dir('infra') {
-                    sh 'terraform plan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    dir('infra') {
+                        sh 'terraform plan'
+                    }
                 }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                dir('infra') {
-                    sh 'terraform apply -auto-approve'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    dir('infra') {
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
@@ -116,7 +131,7 @@ pipeline {
                 sshagent(credentials: ['jhansi-ec2-terraform']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    
+
                     echo "Cloning repository on EC2..."
                     if [ ! -d terraform-ansible-project ]; then
                       git clone https://github.com/jhansi-r17909/terraform-ansible-project.git
@@ -141,7 +156,6 @@ pipeline {
 
                     echo "Checking services..."
                     kubectl get svc -A
-
                     '
                     """
                 }
