@@ -104,7 +104,7 @@ pipeline {
         stage('Push Docker Image to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'jhansi-docker-credentials') {
                         docker.image("${DOCKER_IMAGE}:latest").push()
                     }
                 }
