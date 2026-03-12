@@ -91,6 +91,13 @@
         remote_src: true
         mode: '0755'
 
+    - name: Create .kube directory
+      file:
+        path: "{{ target_home }}/.kube"
+        state: directory
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+
     - name: Start Minikube
       become_user: "{{ target_user }}"
       ansible.builtin.shell: |
