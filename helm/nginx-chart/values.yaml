@@ -1,5 +1,5 @@
 image:
-  repository: darninidhi2122/nginx-devops
+  repository: jhansi445/jhansi-terraform-image
   tag: latest
 
 service:
