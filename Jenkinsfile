@@ -127,14 +127,26 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
-                    export PATH=\$PATH:/usr/local/bin
+                    export PATH=/usr/local/bin:\$PATH
                     export KUBECONFIG=/home/ubuntu/.kube/config
 
-                    echo "Checking kubectl..."
-                    kubectl version --client || exit 1
+                    echo "Checking kubectl installation..."
+                    if [ ! -f /usr/local/bin/kubectl ]; then
+                        echo "kubectl not installed"
+                        exit 1
+                    fi
 
-                    echo "Checking helm..."
-                    helm version || exit 1
+                    echo "Checking helm installation..."
+                    if [ ! -f /usr/local/bin/helm ]; then
+                        echo "helm not installed"
+                        exit 1
+                    fi
+
+                    echo "kubectl version:"
+                    /usr/local/bin/kubectl version --client
+
+                    echo "helm version:"
+                    /usr/local/bin/helm version
 
                     echo "Cloning repository on EC2..."
                     if [ ! -d terraform-ansible-project ]; then
@@ -148,16 +160,16 @@ pipeline {
                     cd terraform-ansible-project
 
                     echo "Checking Kubernetes nodes..."
-                    kubectl get nodes
+                    /usr/local/bin/kubectl get nodes
 
                     echo "Deploying Helm chart..."
-                    helm upgrade --install nginx-app ./helm/nginx-chart
+                    /usr/local/bin/helm upgrade --install nginx-app ./helm/nginx-chart
 
                     echo "Checking pods..."
-                    kubectl get pods -A
+                    /usr/local/bin/kubectl get pods -A
 
                     echo "Checking services..."
-                    kubectl get svc -A
+                    /usr/local/bin/kubectl get svc -A
                     '
                     """
                 }
