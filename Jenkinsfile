@@ -127,18 +127,25 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
+                    export PATH=\$PATH:/usr/local/bin
+                    export KUBECONFIG=/home/ubuntu/.kube/config
+
+                    echo "Checking kubectl..."
+                    kubectl version --client || exit 1
+
+                    echo "Checking helm..."
+                    helm version || exit 1
+
                     echo "Cloning repository on EC2..."
                     if [ ! -d terraform-ansible-project ]; then
-                      git clone https://github.com/jhansi-r17909/terraform-ansible-project.git
+                        git clone https://github.com/jhansi-r17909/terraform-ansible-project.git
                     else
-                      cd terraform-ansible-project
-                      git pull origin main
-                      cd ..
+                        cd terraform-ansible-project
+                        git pull origin main
+                        cd ..
                     fi
 
                     cd terraform-ansible-project
-
-                    export KUBECONFIG=/home/ubuntu/.kube/config
 
                     echo "Checking Kubernetes nodes..."
                     kubectl get nodes
