@@ -7,8 +7,8 @@ service:
   port: 80
   nodePort: 30009
 
-serviceAccount:
-  create: true
-  name: ""
-  annotations: {}
-  automount: true
+# serviceAccount:
+#   create: true
+#   name: ""
+#   annotations: {}
+#   automount: true
