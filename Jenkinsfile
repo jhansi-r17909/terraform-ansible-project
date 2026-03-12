@@ -119,7 +119,11 @@ pipeline {
                     
                     echo "Cloning repository on EC2..."
                     if [ ! -d terraform-ansible-project ]; then
-                    git clone https://github.com/darninidhi2122/terraform-ansible-project.git
+                      git clone https://github.com/darninidhi2122/terraform-ansible-project.git
+                    else
+                      cd terraform-ansible-project
+                      git pull origin main
+                      cd ..
                     fi
 
                     cd terraform-ansible-project
