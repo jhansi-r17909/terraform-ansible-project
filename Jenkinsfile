@@ -5,14 +5,14 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = "us-east-1"
         ANSIBLE_HOST_KEY_CHECKING = "False"
-        DOCKER_IMAGE = "darninidhi2122/nginx-devops"
+        DOCKER_IMAGE = "jhansi445/jhansi-terraform-image"
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/darninidhi2122/terraform-ansible-project.git'
+                git branch: 'main', url: ''
             }
         }
 
@@ -80,7 +80,7 @@ pipeline {
 
         stage('Configure Minikube with Ansible') {
             steps {
-                sshagent(credentials: ['ec2-key']) {
+                sshagent(credentials: ['jhansi-ec2-terraform']) {
                     sh """
                     cd ansible-1
                     export ANSIBLE_CONFIG=ansible.cfg
@@ -113,7 +113,7 @@ pipeline {
 
         stage('Deploy Application with Helm') {
             steps {
-                sshagent(credentials: ['ec2-key']) {
+                sshagent(credentials: ['jhansi-ec2-terraform']) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                     
