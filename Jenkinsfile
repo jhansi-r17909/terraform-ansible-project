@@ -18,10 +18,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-creds'
-                ]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     dir('infra') {
                         sh 'terraform init'
                     }
@@ -31,18 +28,17 @@ pipeline {
 
         stage('Terraform Validate') {
             steps {
-                dir('infra') {
-                    sh 'terraform validate'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir('infra') {
+                        sh 'terraform validate'
+                    }
                 }
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-creds'
-                ]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     dir('infra') {
                         sh 'terraform plan'
                     }
@@ -52,10 +48,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-creds'
-                ]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     dir('infra') {
                         sh 'terraform apply -auto-approve'
                     }
@@ -65,13 +58,15 @@ pipeline {
 
         stage('Fetch EC2 Public IP') {
             steps {
-                script {
-                    env.EC2_IP = sh(
-                        script: "terraform -chdir=infra output -raw minikube_public_ip",
-                        returnStdout: true
-                    ).trim()
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    script {
+                        env.EC2_IP = sh(
+                            script: "terraform -chdir=infra output -raw minikube_public_ip",
+                            returnStdout: true
+                        ).trim()
 
-                    echo "EC2 Public IP: ${EC2_IP}"
+                        echo "EC2 Public IP: ${EC2_IP}"
+                    }
                 }
             }
         }
