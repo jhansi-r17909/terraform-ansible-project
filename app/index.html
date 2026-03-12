@@ -1,10 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>DevOps Pipeline</title>
+<title>DevOps CI/CD Pipeline</title>
+
+<style>
+
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    color:white;
+    text-align:center;
+}
+
+.header {
+    padding:40px;
+}
+
+.header h1 {
+    font-size:50px;
+}
+
+.pipeline {
+    margin-top:50px;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+}
+
+.tool {
+    background:white;
+    color:black;
+    padding:20px;
+    border-radius:10px;
+    width:180px;
+    font-weight:bold;
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+.tool:hover {
+    transform:scale(1.05);
+}
+
+.footer {
+    margin-top:80px;
+    padding:20px;
+    font-size:18px;
+}
+
+</style>
 </head>
+
 <body>
-<h1>🚀 Jenkins + Terraform + Ansible + Helm</h1>
-<p>Nginx deployed in Minikube!</p>
+
+<div class="header">
+<h1>DevOps CI/CD Pipeline</h1>
+<p>Application deployed using Jenkins, Terraform, Ansible, Docker, Helm, and Kubernetes</p>
+</div>
+
+<h2>Pipeline Workflow</h2>
+
+<div class="pipeline">
+
+<div class="tool">Jenkins<br>CI Pipeline</div>
+
+<div class="tool">Terraform<br>Provision AWS</div>
+
+<div class="tool">Ansible<br>Server Setup</div>
+
+<div class="tool">Docker<br>Build Image</div>
+
+<div class="tool">DockerHub<br>Image Registry</div>
+
+<div class="tool">Kubernetes<br>Minikube Cluster</div>
+
+<div class="tool">Helm<br>Deploy App</div>
+
+<div class="tool">Nginx<br>Application</div>
+
+</div>
+
+<div class="footer">
+
+<p>DevOps Project</p>
+
+<p>
+CI/CD pipeline automatically provisions infrastructure on AWS,
+configures the server using Ansible, builds a Docker image,
+and deploys the application to Kubernetes using Helm.
+</p>
+
+<p>Deployed Successfully </p>
+
+</div>
+
 </body>
 </html>
