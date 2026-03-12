@@ -48,14 +48,47 @@ pipeline {
             }
         }
 
+        stage('Fetch EC2 Public IP') {
+            steps {
+                script {
+                    env.EC2_IP = sh(
+                        script: "terraform -chdir=infra output -raw minikube_public_ip",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "EC2 Public IP: ${EC2_IP}"
+                }
+            }
+        }
+
+        stage('Wait for EC2 SSH') {
+            steps {
+                script {
+                    sh """
+                    echo "Waiting for SSH to become available on ${EC2_IP}"
+
+                    while ! nc -z ${EC2_IP} 22; do
+                        echo "SSH not ready yet..."
+                        sleep 10
+                    done
+
+                    echo "SSH is now available!"
+                    """
+                }
+            }
+        }
+
         stage('Configure Minikube with Ansible') {
             steps {
                 sshagent(credentials: ['ec2-key']) {
-                    sh '''
+                    sh """
                     cd ansible-1
                     export ANSIBLE_CONFIG=ansible.cfg
-                    ansible-playbook -i aws_ec2.yml -u ubuntu playbook.yml
-                    '''
+
+                    ansible-playbook -i aws_ec2.yml \
+                    --extra-vars "target_host=${EC2_IP}" \
+                    -u ubuntu playbook.yml
+                    """
                 }
             }
         }
@@ -81,14 +114,25 @@ pipeline {
         stage('Deploy Application with Helm') {
             steps {
                 sshagent(credentials: ['ec2-key']) {
-                    sh '''
-                    ssh ubuntu@$(terraform -chdir=infra output -raw minikube_public_ip) << EOF
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} << 'EOF'
+
                     cd terraform-ansible-project
+
+                    echo "Checking Kubernetes nodes..."
+                    kubectl get nodes
+
+                    echo "Deploying Helm chart..."
                     helm upgrade --install nginx-app helm/nginx-chart
+
+                    echo "Checking pods..."
                     kubectl get pods
+
+                    echo "Checking services..."
                     kubectl get svc
+
                     EOF
-                    '''
+                    """
                 }
             }
         }
